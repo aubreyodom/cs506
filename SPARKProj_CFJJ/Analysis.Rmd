@@ -1,0 +1,175 @@
+---
+title: "Analysis"
+author: "Aubrey Odom"
+date: "10/1/2021"
+output: html_document
+---
+
+# Setup
+
+```{R setup}
+suppressPackageStartupMessages({
+  library(magrittr)
+  library(tidyverse)
+  library(knitr)
+})
+```
+
+# Read in the Data
+
+```{R read in data}
+
+# Field Interrogations: 2019
+field_pre <- readxl::read_xlsx("ds-cfjj-police-accountability/Team1/Data/2019 FI SPREADSHEET UPDATED 08.11.2020 - Joshua Dankoff.xlsx",
+                               sheet = "UN-REDACTED 2019 FI SPREADSHEET")
+field <- field_pre %>%
+  filter(ResidentStatus == "R") %>%
+  mutate(year = sapply(CreatedDate, function(x) substr(x, 1, 4)),
+         month = sapply(CreatedDate, function(x) substr(x, 5, 6)),
+         day = sapply(CreatedDate, function(x) substr(x, 7, 8)),
+         all = paste(year, month, day, sep = "/"),
+         Age = cut(Age, breaks = c(0, 17, 20, 25, 100),
+                   labels = c("Less than 18", "18-20", "20-25", "25+")),
+         CreatedDate = as.Date(all, format = "%Y/%m/%d")) %>%
+  select(-all_of(c("year", "month", "day", "all", "ModifiedTime",
+                   "ModifiedDate", "ExcludeFromDataShare",
+                   "ResidentStatus"))) %>%
+  mutate(Sex = factor(Sex, levels = c("F", "M", "U"), 
+                      labels = c("Female", "Male", "Unknown")),
+         Race = factor(Race, levels = c("W", "B", "A", "I", "U"),
+                       labels = c("White", "Black", "Asian", "Indian",
+                                  "Unknown")),
+         Ethnicity = factor(Ethnicity, levels = c("N", "H", "U"),
+                       labels = c("Non-Hispanic", "Hispanic", "Unknown"))) %>%
+  select_if(~sum(!is.na(.)) > 0)
+
+
+# ROSTERS ---------------------------------------------------------------------
+
+# State Police Department Data: 
+# Springfield Police Roster Data (also see the police roster data in section 4 below)
+state_roster <- readxl::read_xls("ds-cfjj-police-accountability/Team1/Data/SPD_Roster_2019_Stops.xls")
+
+# Springfield police roster
+roster <- readxl::read_xlsx("ds-cfjj-police-accountability/Team1/Data/CPCS PRR.xlsx")
+
+
+# Springfield Budget...
+# City of Springfield salaries 2020...
+# SPRINGFIELD 006: Civil suits
+# SPRINGFIELD 006: IIU Investigations
+```
+
+# Analysis
+
+## Field Interrogations 2019
+
+TO DO:
+- Could do PCA, clustering
+- Normalize against the Springfield population
+- Alluvial plots
+- More crosstab (create functions)
+
+
+### Cross-tabulations
+
+```{R}
+# Crosstab by Sex and Race
+field %>%
+  group_by(Sex, Race) %>%
+  summarise(number = n(), .groups = "drop_last") %>%
+  spread(Sex, number) %>%
+  kable()
+
+# Cross tabulation of Race_Ethnicity and Sex of offender
+race_eth_tab <- field %>%
+  mutate(Race_Eth = paste(Race, Ethnicity)) %>%
+  group_by(Sex, Race_Eth) %>%
+  summarise(number = n(), .groups = "drop_last") %>%
+  spread(Sex, number)
+kable(race_eth_tab)
+
+# Race/Ethnicity as a proportion of gender
+race_eth_prop <- race_eth_tab %>%
+  mutate(Female = Female/sum(Female, na.rm = TRUE),
+         Male = Male/sum(Male, na.rm = TRUE),
+         Unknown = Unknown/sum(Unknown, na.rm = TRUE))
+kable(race_eth_prop, digits = 3)
+```
+
+### Alluvial plots
+
+### Scatterplots
+```{R functions for plotting}
+# Look at dates
+mk_plot_race <- function(this_race) {
+  field %>%
+  filter(Race == this_race) %>%
+  mutate(CreatedWeek = as.Date(cut(CreatedDate, breaks = "week"))) %>%
+  group_by(CreatedWeek) %>%
+  summarise(NumInterrogated = n()) %>%
+  ggplot(., aes(CreatedWeek, NumInterrogated)) +
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ splines::bs(x, 3), se = FALSE) + 
+  labs(x = "Date Interrogated", y = "Individuals Interrogated",
+       title = "Number of Interrogations per Week", subtitle = paste("Race:", this_race))
+}
+
+mk_plot_ethnicity <- function(this_eth) {
+  field %>%
+  filter(Ethnicity == this_eth) %>%
+  mutate(CreatedWeek = as.Date(cut(CreatedDate, breaks = "week"))) %>%
+  group_by(CreatedWeek) %>%
+  summarise(NumInterrogated = n()) %>%
+  ggplot(., aes(CreatedWeek, NumInterrogated)) +
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ splines::bs(x, 3), se = FALSE) + 
+  labs(x = "Date Interrogated", y = "Individuals Interrogated",
+       title = "Number of Interrogations per Week", subtitle = paste("Ethnicity:", this_eth))
+}
+
+plot_by_var_FIO <- function(which_var) {
+  field %>%
+  mutate(selectingvar = unlist(field[, which_var]),
+         CreatedWeek = as.Date(cut(CreatedDate, breaks = "week"))) %>%
+  group_by(selectingvar, CreatedWeek) %>%
+  summarise(NumInterrogated = n(), .groups = "drop_last") %>%
+  ggplot(., aes(CreatedWeek, NumInterrogated)) +
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ splines::bs(x, 3), se = FALSE) + 
+  facet_wrap(~selectingvar) +
+  labs(x = "Date Interrogated", y = "Individuals Interrogated",
+       title = "Number of Interrogations per Week",
+       subtitle = paste("Grouped by", which_var))
+}
+
+```
+
+```{R}
+mk_plot_race("White")
+mk_plot_race("Black")
+
+mk_plot_ethnicity("Hispanic")
+mk_plot_ethnicity("Non-Hispanic")
+```
+
+### Facet wrapped scatterplots
+
+```{R}
+# Find all with less than 16 unique fields to plot
+to_view <- colnames(field)[apply(field, 2,
+                                 function(x) length(unique(x)) < 16)]
+
+for (which_var in to_view) {
+  plot_by_var_FIO(which_var)
+  ggsave(paste("ds-cfjj-police-accountability/Team1/Plots/Scatterplot_facet_",
+               which_var, ".png", sep = ""))
+}
+
+```
+
+#
+```{R}
+
+```
+

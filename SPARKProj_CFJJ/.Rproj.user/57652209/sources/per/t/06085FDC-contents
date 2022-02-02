@@ -1,0 +1,292 @@
+---
+title: "State-wide Traffic Data and Merging of Rosters"
+author: "Aubrey Odom"
+date: "11/8/2021"
+output: html_document
+---
+
+# Setup
+```{R}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(magrittr)
+})
+```
+
+# Read in Data
+```{R}
+home <- "~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/"
+read_law <- paste(home,
+                  "Law Enforcement Misconduct Database (9.28.21) cpcs.xlsx",
+                   sep = "")
+lawenf <- readxl::read_xlsx(read_law)
+# Subset of roster to merge on
+lowell_lawenf <- lawenf %>% filter(`Agency` == "Lowell Police Department") %>%
+  select(`Full Name`, `Internal Unique ID`) %>% 
+  tidyr::separate(`Full Name`, c("LAST NAME", "FIRST NAME")) %>%
+  mutate(`Full Name` = paste(`LAST NAME`, `FIRST NAME`, sep = ", ")) %>%
+  select(`Full Name`, `Internal Unique ID`)
+# Obtained Lowell badge numbers
+lowell_badges <- readxl::read_xls("~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/LowellBadgeNumbers.xls", skip = 1)[, c(1, 3:4)] %>% 
+  filter(!is.na(BADGE)) %>%
+  tidyr::separate(`FIRST NAME`, c("FIRST NAME")) %>%
+  tidyr::separate(`LAST NAME`, c("LAST NAME")) %>%
+  mutate(`Full Name` = paste(`LAST NAME`, `FIRST NAME`, sep = ", "),
+         BADGE = str_remove(BADGE, "[^[:alnum:]]"),
+         BADGE = str_remove_all(BADGE, "\\*")) %>%
+  select(`Badge Num` = BADGE, `Full Name`) %>%
+  arrange(`Full Name`)
+
+merged <- lowell_badges %>%
+  left_join(lowell_lawenf, ., by = "Full Name") %>%
+  filter(!is.na(`Badge Num`)) %>%
+  distinct(`Internal Unique ID`, .keep_all = TRUE) %>%
+  select(-`Full Name`)
+
+ind <- which(lawenf$`Internal Unique ID` %in% merged$`Internal Unique ID`)
+lawenf[ind, "Badge Num"] <- merged$`Badge Num`
+write.csv(lawenf, paste(home, "LawEnforcementMisconductDatabase_11_17_21_cpcs.csv",
+                        sep = ""), row.names = FALSE)
+```
+
+# Data cleaning
+```{R}
+cleandata <- function(year) {
+  home <- "~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/"
+  pathname <- paste(home,
+                    "sqr 21318 MRP all citations for ", year, ".csv",
+                    sep = "")
+  # Specify column types
+  coltypes <- cols(
+    `Issuing Agency` = col_character(),
+    `Agency Code` = col_character(),
+    OfficerID = col_character(),
+    `Event Date` = col_datetime(format = ""),
+    `Time-HH` = col_character(),
+    `Time-MM` = col_character(),
+    `AM-PM` = col_character(),
+    `Viol Type` = col_character(),
+    `Citation #` = col_character(),
+    `Citation Type` = col_character(),
+    Offense = col_character(),
+    `Offense Description` = col_character(),
+    `Location Name` = col_character(),
+    Searched = col_character(),
+    `Crash?` = col_character(),
+    `Court Code` = col_character(),
+    Race = col_character(),
+    Gender = col_character(),
+    `Year of Birth` = col_integer(),
+    `Lic State` = col_character(),
+    `Lic Class` = col_character(),
+    CDL = col_character(),
+    PlateType = col_character(),
+    `Vhc State` = col_character(),
+    `Vhc Year` = col_integer(),
+    `Make Model` = col_character()
+  )
+  # Read in whole csv (with errors)
+  allyear_test <- read_csv(pathname, col_types = coltypes,
+                           show_col_types = FALSE)
+  # Read in values with only two columns
+  knot <- read_delim(pathname, skip = 1, delim = "§", col_names = FALSE,
+                     show_col_types = FALSE)
+  # Separate values in each column
+  pre_knot <- read_csv(I(knot$X1), col_names = FALSE, show_col_types = FALSE)
+  knot_fixed <- read_csv(I(knot$X2), col_names = FALSE, show_col_types = FALSE)
+  # Replace values in OG data with corrected columns
+  allyear_test$`Offense Description` <- paste(pre_knot$X12, knot_fixed$X1,
+                                              sep = " §")
+  allyear_test[, 13:ncol(allyear_test)] <- knot_fixed[, -1]
+  # Export data
+  allyear_test %<>%
+    select(-c(`Time-MM`, `Agency Code`, `Lic Class`, CDL, PlateType,
+              `Vhc Year`, `Lic State`)) %>%
+    mutate(`AM-PM` = replace(`AM-PM`, `AM-PM` == "UNK", NA),
+           Gender = replace(`Gender`, `Gender` == "UNK", NA),
+           Race = replace(`Race`, `Race` == "UNK", NA))
+  rm(knot, pre_knot, knot_fixed)
+  # Change time of day "unk" to NA
+  # Group citation number within agency
+  message("Merging files")
+  read_law <- paste(home,
+                    "LawEnforcementMisconductDatabase_11_17_21_cpcs.csv",
+                    sep = "")
+  lawenf <- readr::read_csv(read_law, show_col_types = FALSE) %>%
+    select(-c(Notes))
+  # We want which officers are making which stops
+  # Remove anything with nas in issuing agency, officer ID
+  to_rep <- c("Dept" = "Department",
+              "Pd" = "Police Department",
+              "Cnty" = "County", "Hosp" = "Hospital",
+              "W " = "West ", "E " = "East ", "N " = "North ", "S " = "South ")
+  allyear_filt <- allyear_test %>%
+    mutate(`Issuing Agency` = str_remove_all(str_to_title(`Issuing Agency`),
+                                             "\\."),
+           `Issuing Agency` = str_replace_all(`Issuing Agency`, to_rep),
+           OfficerID = as.numeric(str_remove_all(OfficerID, "[^0-9]"))) %>%
+    mutate(`Issuing Agency` = str_remove_all(`Issuing Agency`,
+                                             "\\b Police Department\\b"),
+           `Issuing Agency` = replace(`Issuing Agency`,
+                                      str_detect(`Issuing Agency`,
+                                                 "\\bBoston Police\\b"),
+                                      "Boston"),
+           `Issuing Agency` = replace(`Issuing Agency`,
+                                      str_detect(`Issuing Agency`,
+                                                 "\\bState Police\\b"),
+                                      "Massachusetts State Police"))
+  allyear_filt$uniqueobs <- seq_len(nrow(allyear_filt))
+  
+  lawenf_filt <- lawenf %>%
+  mutate(`Issuing Agency` = str_remove_all(`Agency`,
+                                           "\\b Police Department\\b"),
+         `Badge Num` = as.numeric(str_remove_all(`Badge Num`, "[^0-9]")),
+         `Employee ID` = as.numeric(str_remove_all(`Employee ID`, "[^0-9]"))) %>%
+  filter((!is.na(`Employee ID`) | !is.na(`Badge Num`)))
+  #- --------------------------
+  # Approach 1: Merge on whatever is larger
+  larger <- lawenf_filt %>% group_by(`Issuing Agency`) %>%
+  summarise(num_badge = length(unique(`Badge Num`)),
+            num_id = length(unique(`Employee ID`))) %>%
+    select(num_id, num_badge) %>%
+    apply(., 1, which.max) %>% unlist %>% as_tibble() %>%
+    mutate(`Issuing Agency` = unique(lawenf_filt$`Issuing Agency`))
+  pt1 <- lawenf_filt %>% left_join(., larger, by = "Issuing Agency") %>%
+    filter(value == 1, !is.na(`Employee ID`)) %>% mutate(OfficerID = `Employee ID`)
+  pt2 <- lawenf_filt %>% left_join(., larger, by = "Issuing Agency") %>%
+    filter(value == 2, !is.na(`Badge Num`)) %>% mutate(OfficerID = `Badge Num`)
+  all_entries_A1 <- dplyr::bind_rows(pt1, pt2) %>%
+    group_by(`Issuing Agency`) %>% distinct(OfficerID, .keep_all = TRUE) %>%
+    inner_join(., allyear_filt, by = c("Issuing Agency", "OfficerID"))
+    # mutate(`DOT Identifier` = "Employee ID")
+  # Approach 2: Merge on whatever else
+  lawenf_filt1 <- lawenf_filt %>%
+    filter(!(`Internal Unique ID` %in% all_entries_A1$`Internal Unique ID`))
+  pt3 <- lawenf_filt1 %>% left_join(., larger, by = "Issuing Agency") %>%
+    filter(value == 1, !is.na(`Badge Num`)) %>% mutate(OfficerID = `Badge Num`)
+  pt4 <- lawenf_filt1 %>% left_join(., larger, by = "Issuing Agency") %>%
+    filter(value == 2, !is.na(`Employee ID`)) %>% mutate(OfficerID = `Employee ID`)
+  all_entries_A2 <-  dplyr::bind_rows(pt3, pt4) %>%
+    group_by(`Issuing Agency`) %>% distinct(OfficerID, .keep_all = TRUE) %>%
+    inner_join(., allyear_filt, by = c("Issuing Agency", "OfficerID")) %>%
+    filter(!(uniqueobs %in% all_entries_A1$uniqueobs))
+  # FINAL BINDING
+  unique_allentries <- allyear_filt %>%
+    filter(!(uniqueobs %in% unique(c(all_entries_A1$uniqueobs,
+                                     all_entries_A2$uniqueobs))))
+  all_entries <- bind_rows(unique_allentries, all_entries_A1, all_entries_A2) %>%
+    mutate(`MassDOT ID` = OfficerID) %>%
+    select(-OfficerID, -uniqueobs) %>%
+    arrange(`Event Date`)
+  to_save <- paste(home, "DOT", year, "merged.csv", sep = "")
+  message("writing merged file to", to_save)
+  write.csv(all_entries, to_save)
+  return(all_entries)
+}
+```
+
+# Write cleaned data
+```{R}
+allentries_2016 <- cleandata(2016)
+allentries_2017 <- cleandata(2017)
+allentries_2018 <- cleandata(2018)
+allentries_2019 <- cleandata(2019)
+allentries_2020 <- cleandata(2020)
+
+all_entries = bind_rows(list("2016" = allentries_2016, "2017" = allentries_2017,
+                             "2018" = allentries_2016, "2019" = allentries_2019,
+                             "2020" = allentries_2020), .id = "Year of Stop")
+```
+
+# Look at MassDOT ID
+```{R}
+lawenf_mass <- all_entries %>%
+  filter(!is.na(`Internal Unique ID`)) %>%
+  select(`Internal Unique ID`, `MassDOT ID`) %>%
+  distinct(`Internal Unique ID`, .keep_all = TRUE) %>%
+  right_join(., lawenf, by = 'Internal Unique ID')
+
+to_save <- paste(home, "roster_DOT_merged.csv", sep = "")
+write.csv(lawenf_mass, to_save, row.names = FALSE)
+```
+
+# Why is there so much missingness
+
+```{R}
+
+lawenf_filt <- lawenf %>%
+  mutate(`Issuing Agency` = str_remove_all(`Agency`,
+                                           "\\b Police Department\\b"),
+         `Badge Num` = as.numeric(str_remove_all(`Badge Num`, "[^0-9.]")),
+         `Employee ID` = as.numeric(str_remove_all(`Employee ID`, "[^0-9.]")))
+
+lawenf_mass <- all_entries %>%
+  filter(!is.na(`Internal Unique ID`)) %>%
+  select(`Internal Unique ID`, `MassDOT ID`) %>%
+  distinct(`Internal Unique ID`, .keep_all = TRUE) %>%
+  right_join(., lawenf_filt, by = 'Internal Unique ID')
+
+# --------------------------------------
+
+# Look at entries
+tmp <- all_entries %>%
+  select(`Full Name`, `Issuing Agency`, `MassDOT ID`) %>%
+  filter(is.na(`Full Name`),
+         !is.na(`Issuing Agency`),
+         !is.na(`MassDOT ID`),
+         `Issuing Agency` %in% lawenf_mass$`Issuing Agency`) %>%
+  distinct(`MassDOT ID`, .keep_all = TRUE) %>%
+  arrange(`Issuing Agency`, `MassDOT ID`) 
+
+roster_tmp <- lawenf_mass %>%
+  filter(!is.na(`Badge Num`) | !is.na(`Employee ID`),
+         is.na(`MassDOT ID`)) %>%
+  select(`Full Name`, `Issuing Agency`, `Employee ID`, `Badge Num`) %>%
+  arrange(`Employee ID`)
+
+# Identification Rate ----------------------------------------------
+
+lawenf_mass %>%
+  #filter(`Issuing Agency` %in% lawenf_mass$`Issuing Agency`) %>%
+  group_by(`Agency`) %>%
+  summarise(identified = sum(!is.na(`MassDOT ID`)),
+            all_na = sum(is.na(`Employee ID`) & is.na(`Badge Num`)),
+            total = n(),
+            proportion = identified/(total - all_na)) %>%
+  arrange(proportion) %>%
+  summarise(sum(identified))
+  View
+  write.csv(., "prop_unidentified_roster.csv")
+  
+# Could simplify Boston police
+
+
+```
+
+# Simple analysis
+
+```{R}
+
+allentries_2020 %>%
+  group_by(`Full Name`) %>%
+  summarise(Total = n()) %>%
+  arrange(desc(Total))
+
+all_entries %>%
+  filter(`Full Name` == "Birritteri, Marc") %>%
+  group_by(`Offense Description`) %>%
+  summarise(Total = n()) %>%
+  arrange(desc(Total))
+
+allentries_2020 %>%
+  filter(`Issuing Agency` == "Springfield") %>%
+  group_by(`Full Name`) %>%
+  summarise(Total = n()) %>%
+  arrange(desc(Total))
+```
+
+```{R}
+tmp <- read_csv("~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/sqr 21318 MRP all citations for 2019.csv")
+```
+
+

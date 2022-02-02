@@ -1,0 +1,26 @@
+{
+    "id": "06085FDC",
+    "path": "~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/MassDOT_data_merging.Rmd",
+    "project_path": "ds-cfjj-police-accountability/Team1/Data/MassDOT_data_merging.Rmd",
+    "type": "r_markdown",
+    "hash": "1201553538",
+    "contents": "",
+    "dirty": false,
+    "created": 1638374719172.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "35,50",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1638376468,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1638376468714,
+    "read_only": false,
+    "read_only_alternatives": []
+}

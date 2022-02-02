@@ -1,0 +1,27 @@
+{
+    "id": "BE2EC94F",
+    "path": "~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/SchoolArrests_ARO.Rmd",
+    "project_path": "ds-cfjj-police-accountability/Team1/Data/SchoolArrests_ARO.Rmd",
+    "type": "r_markdown",
+    "hash": "2455257579",
+    "contents": "",
+    "dirty": false,
+    "created": 1638374720407.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "1,38",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1638374745,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1638374745323,
+    "read_only": false,
+    "read_only_alternatives": []
+}

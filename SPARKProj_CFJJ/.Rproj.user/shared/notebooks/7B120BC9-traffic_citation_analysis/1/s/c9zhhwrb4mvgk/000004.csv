@@ -1,0 +1,8 @@
+"0","lawenf_mass <- all_entries %>%"
+"0","  filter(!is.na(`Internal Unique ID`)) %>%"
+"0","  select(`Internal Unique ID`, `MassDOT ID`) %>%"
+"0","  distinct(`Internal Unique ID`, .keep_all = TRUE) %>%"
+"0","  right_join(., lawenf, by = 'Internal Unique ID')"
+"0",""
+"0","to_save <- paste(home, ""roster_DOT_merged.csv"", sep = """")"
+"0","write.csv(lawenf_mass, to_save, row.names = FALSE)"

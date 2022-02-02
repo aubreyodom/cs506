@@ -1,0 +1,88 @@
+"0","allentries_2016 <- cleandata(2016)"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Merging files
+"
+"2","writing merged file to~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/DOT2016merged.csv
+"
+"0","allentries_2017 <- cleandata(2017)"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Merging files
+"
+"2","writing merged file to~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/DOT2017merged.csv
+"
+"0","allentries_2018 <- cleandata(2018)"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Merging files
+"
+"2","writing merged file to~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/DOT2018merged.csv
+"
+"0","allentries_2019 <- cleandata(2019)"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Merging files
+"
+"2","writing merged file to~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/DOT2019merged.csv
+"
+"0","allentries_2020 <- cleandata(2020)"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Warning:"
+"2"," One or more parsing issues, see `problems()` for details
+"
+"2","Merging files
+"
+"2","writing merged file to~/johnsonlab/aodom/cs506/SPARKProj_CFJJ/ds-cfjj-police-accountability/Team1/Data/DOT_Citations_data/DOT2020merged.csv
+"
+"0","all_entries = bind_rows(list(""2016"" = allentries_2016, ""2017"" = allentries_2017,"
+"0","                             ""2018"" = allentries_2016, ""2019"" = allentries_2019,"
+"0","                             ""2020"" = allentries_2020), .id = ""Year of Stop"")"

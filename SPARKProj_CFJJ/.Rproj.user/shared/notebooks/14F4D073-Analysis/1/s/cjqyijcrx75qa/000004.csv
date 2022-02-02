@@ -1,0 +1,8 @@
+"0",""
+"0","# Cross tabulation of Race_Ethnicity and Sex of offender"
+"0","race_eth_tab <- field %>%"
+"0","  mutate(Race_Eth = paste(Race, Ethnicity)) %>%"
+"0","  group_by(Sex, Race_Eth) %>%"
+"0","  summarise(number = n(), .groups = ""drop_last"") %>%"
+"0","  spread(Sex, number)"
+"0","kable(race_eth_tab)"

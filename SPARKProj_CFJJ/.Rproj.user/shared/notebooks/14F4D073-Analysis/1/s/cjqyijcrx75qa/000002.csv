@@ -1,0 +1,6 @@
+"0","# Crosstab by Sex and Race"
+"0","field %>%"
+"0","  group_by(Sex, Race) %>%"
+"0","  summarise(number = n(), .groups = ""drop_last"") %>%"
+"0","  spread(Sex, number) %>%"
+"0","  kable()"

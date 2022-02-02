@@ -1,0 +1,169 @@
+"0","# Find all with less than 16 unique fields to plot"
+"0","to_view <- colnames(field)[apply(field, 2,"
+"0","                                 function(x) length(unique(x)) < 16)]"
+"0",""
+"0","for (which_var in to_view) {"
+"0","  plot_by_var_FIO(which_var)"
+"0","  ggsave(paste(""ds-cfjj-police-accountability/Team1/Plots/Scatterplot_facet_"","
+"0","               which_var, "".png"", sep = """"))"
+"0","}"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"
+"2","Saving 7 x 7 in image
+"
+"2","Warning in predict.lm(model, newdata = new_data_frame(list(x = xseq)), se.fit = se,  :"
+"2","
+ "
+"2"," prediction from a rank-deficient fit may be misleading
+"
+"2","Saving 7 x 7 in image
+"

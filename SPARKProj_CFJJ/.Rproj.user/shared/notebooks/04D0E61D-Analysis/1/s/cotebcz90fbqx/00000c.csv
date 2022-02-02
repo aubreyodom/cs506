@@ -1,0 +1,7 @@
+"0",""
+"0","# Race/Ethnicity as a proportion of gender"
+"0","race_eth_prop <- race_eth_tab %>%"
+"0","  mutate(Female = Female/sum(Female, na.rm = TRUE),"
+"0","         Male = Male/sum(Male, na.rm = TRUE),"
+"0","         Unknown = Unknown/sum(Unknown, na.rm = TRUE))"
+"0","kable(race_eth_prop, digits = 3)"
